@@ -15,6 +15,175 @@
     </entry>
     
     
+    
+    <entry>
+      <title>Onedrive使用</title>
+      <link href="/2020/01/09/Onedrive%E4%BD%BF%E7%94%A8/"/>
+      <url>/2020/01/09/Onedrive%E4%BD%BF%E7%94%A8/</url>
+      
+        <content type="html"><![CDATA[<h2 id="linux-caddy-aria2-ariang实现离线下载-文件管理-在线播放等功能"><a class="markdownIt-Anchor" href="#linux-caddy-aria2-ariang实现离线下载-文件管理-在线播放等功能"></a> Linux + Caddy + Aria2 + AriaNg，实现离线下载、文件管理、在线播放等功能。</h2><pre><code>Aria2 提供离线下载AriaNg为Aria2 提供WEB界面Caddy filemanager提供文件管理</code></pre><blockquote><p>环境要求<br>CentOS 6+/Debian 8+/Ubuntu 14+<br>操作系统要求64位<br><em><strong>如果服务器有启用安全组，请务必在安全组放行以下端口：6080/6800/6998/51413</strong></em></p></blockquote><a id="more"></a><ul><li>安装</li></ul><p>复制下面的命令，一行一个：</p><pre><code>#CentOS执行以下命令yum -y install wget unzip curlwget https://github.com/helloxz/ccaa/archive/master.zipunzip master.zip &amp;&amp; cd ccaa-master &amp;&amp; sh ccaa.sh#Debian/Ubuntu执行以下命令apt-get install -y wget unzip curlwget https://github.com/helloxz/ccaa/archive/master.zip &amp;&amp; unzip master.zipcd ccaa-master &amp;&amp; chmod +x *.sh &amp;&amp; ./ccaa.sh</code></pre><p>输入1安装<br>根据提示设置下载路径、RPC密钥、用户名、密码，稍后需要用到。<br>安装完成后会看到如下提示，请务必牢记RPC密钥、用户名、密码等信息。<br>根据提示输入</p><div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand code-closed" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;IP：6080&#x2F;</span><br></pre></td></tr></table></figure></div><p>打开AriaNg界面，并输入上一个步骤中设置的Caddy用户名和密码。</p><ul><li><p>更新BT Tracker</p><p>/etc/ccaa/upbt.sh</p></li><li><p>常用命令</p><p>#查看ccaa状态<br>ccaa status<br>#启动ccaa<br>ccaa start<br>#停止ccaa<br>ccaa stop<br>#重启ccaa<br>ccaa restart</p></li></ul><h2 id="支持文件和文件夹上传的onedrive网盘上传工具"><a class="markdownIt-Anchor" href="#支持文件和文件夹上传的onedrive网盘上传工具"></a> 支持文件和文件夹上传的OneDrive网盘上传工具</h2><ul><li><p>授权认证<br>点击右侧URL登录并授权，授权地址<code>https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=78d4dc35-7e46-42c6-9023-2d39314433a5&amp;response_type=code&amp;redirect_uri=http://localhost/onedrive-login&amp;response_mode=query&amp;scope=offline_access%20User.Read%20Files.ReadWrite.All&amp;sso_reload=true</code><br>授权后会获取一个localhost开头打不开的链接，这里复制好整个链接地址，包括localhost。</p></li><li><p>安装OneDriveUploader</p><p>wget <a href="https://raw.githubusercontent.com/MoeClub/OneList/master/OneDriveUploader/amd64/linux/OneDriveUploader" target="_blank" rel="noopener">https://raw.githubusercontent.com/MoeClub/OneList/master/OneDriveUploader/amd64/linux/OneDriveUploader</a> -P /usr/local/bin/</p></li><li><p>初始化配置</p><p>OneDriveUploader -ms -a “url”</p></li><li><p>使用命令</p><p>Usage of OneDriveUploader:<br>-a string<br>// 初始化授权<br>Setup and Init auth.json.<br>-b string<br>// 自定义上传分块大小, 可以提高网络吞吐量, 受限于磁盘性能和网络速度.<br>Set block size. [Unit: M; 5&lt;=b&lt;=60;] (default “10”)<br>-c string<br>// 配置文件路径<br>Config file. (default “auth.json”)<br>-n string<br>// 上传单个文件时,在网盘中重命名<br>Rename file on upload to remote.<br>-r string<br>// 上传到网盘中的某个目录, 默认: 根目录<br>Upload to reomte path.<br>-s string<br>// *必要参数, 要上传的文件或文件夹<br>Upload item.<br>-t string<br>// 线程数, 同时上传文件的个数. 默认: 2<br>Set thread num. (default “2”)<br>-f<br>// 开关(推荐)<br>// 加上 -f 参数，强制读取 auth.json 中的块大小配置和多线程配置.<br>// 不加 -f 参数, 每次覆盖保存当前使用参数到 auth.json 配置文件中.<br>Force Read config form config file. [BlockSize, ThreadNum]<br>-skip<br>// 开关<br>// 跳过上传网盘中已存在的同名文件. (默认不跳过)<br>Skip exist file on remote.<br>-cn<br>// 开关<br>// 授权中国版(世纪互联), 需要此参数.<br>OneDrive by 21Vianet.<br>-ms<br>// 开关<br>// 授权个人版(家庭版), 需要此参数.<br>OneDrive by Microsoft.</p></li><li><p>示例</p></li></ul><p><em><strong><code>OneDriveUploader -skip -s /data/ccaaDown</code></strong></em></p><pre><code>   # 一些示例:    # 将同目录下的 mm00.jpg 文件上传到 OneDrive 网盘根目录    OneDriveUploader -s &quot;mm00.jpg&quot;        # 将同目录下的 mm00.jpg 文件上传到 OneDrive 网盘根目录,并改名为 mm01.jpg    OneDriveUploader -s &quot;mm00.jpg&quot; -n &quot;mm01.jpg&quot;        # 将同目录下的 Download 文件夹上传到 OneDrive 网盘根目录    OneDriveUploader -s &quot;Download&quot;         # 将同目录下的 Download 文件夹上传到 OneDrive 网盘Test目录中    OneDriveUploader -s &quot;Download&quot; -r &quot;Test&quot;        # 将同目录下的 Download 文件夹上传到 OneDrive 网盘Test目录中, 使用 10 线程    OneDriveUploader -t 10 -s &quot;Download&quot; -r &quot;Test&quot;        # 将同目录下的 Download 文件夹上传到 OneDrive 网盘Test目录中, 使用 15 线程, 并设置分块大小为 20M    OneDriveUploader -t 15 -b 20 -s &quot;Download&quot; -r &quot;Test&quot;        # 将同目录下的 Download 文件夹上传到 OneDrive 网盘Test目录中, 使用配置文件中的线程参数和分块大小参数    OneDriveUploader -f -c &quot;/urs/local/auth.json&quot; -s &quot;Download&quot; -r &quot;Test&quot;        # 将同目录下的 Download 文件夹上传到 OneDrive 网盘Test目录中, 使用配置文件中的线程参数和分块大小参数，并跳过上传网盘中已存在的同名文件    OneDriveUploader -f -c &quot;/urs/local/auth.json&quot; -skip -s &quot;Download&quot; -r &quot;Test&quot;</code></pre><h2 id="搭建oneindex"><a class="markdownIt-Anchor" href="#搭建oneindex"></a> 搭建oneindex</h2><p><a href="https://www.newlearner.site/2019/01/11/oneindex.html" target="_blank" rel="noopener">引用</a><br>伪静态</p><pre><code>if (!-f $request_filename){    set $rule_0 1$rule_0;}if (!-d $request_filename){    set $rule_0 2$rule_0;}if ($rule_0 = &quot;21&quot;){    rewrite ^/(.*) /index.php?/$1 last;}</code></pre>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>进制转换C语言实现（十进制转换为任意进制）</title>
+      <link href="/2020/01/09/%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%8D%81%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BB%BB%E6%84%8F%E8%BF%9B%E5%88%B6%EF%BC%89/"/>
+      <url>/2020/01/09/%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%8D%81%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BB%BB%E6%84%8F%E8%BF%9B%E5%88%B6%EF%BC%89/</url>
+      
+        <content type="html"><![CDATA[<p>程序实现功能：<br>输入一个十进制数和R（表示要转换成R进制），输出转换后的数。<br>事例  例如：输入 10   2     输出  1010<br>源代码如下：</p><pre><code>#include&lt;stdio.h&gt;#include&lt;string.h&gt;//int n,num[15],r,count;int n,r,count;void print( int x ){     if( x &lt;= 9 )         printf( &quot;%d&quot;,x );     else         printf( &quot;%c&quot;,x - 10 + 'A' ); }void change( int n,int r ){     if( n )     {         change( n / r, r );         print( n % r );     } }int main( ){    while( scanf( &quot;%d%d&quot;,&amp;n,&amp;r ) != EOF )    {           if( n &lt; 0 )               printf( &quot;-&quot; ),n = -n;           change( n,r );puts( &quot;&quot; );           }    return 0;}</code></pre><p></p><p>原文链接：<a href="https://blog.csdn.net/baidu_41774120/article/details/85140853" target="_blank" rel="noopener">https://blog.csdn.net/baidu_41774120/article/details/85140853</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>2010ACM大赛题目（C语言）</title>
+      <link href="/2020/01/09/2010ACM%E5%A4%A7%E8%B5%9B%E9%A2%98%E7%9B%AE%EF%BC%88C%E8%AF%AD%E8%A8%80%EF%BC%89/"/>
+      <url>/2020/01/09/2010ACM%E5%A4%A7%E8%B5%9B%E9%A2%98%E7%9B%AE%EF%BC%88C%E8%AF%AD%E8%A8%80%EF%BC%89/</url>
+      
+        <content type="html"><![CDATA[<p>题目记录：<br>【涉及知识点】<br>1.函数的参数；<br>2.数组的使用；<br>3.循环；<br>4.数据的输入输出。<br>【题目介绍】<br>设有n根柱子，每根柱子上有一个圆盘，圆盘上有一个正整数，不同圆盘上的数不同。<br>初始时假定柱子按照其上圆盘上数的大小从左向右排列，移动规则是从左向右看，当前一根<br>柱子最下圆盘上数与后一根柱子最上圆盘上数相加的和是一个完全平方数时，前一根柱子上<br>所有圆盘移动到后一根柱子上方。要求你编写程序，输入柱子数目和圆盘上的整数，输出移<br>动的过程和结果。<br>例如，一组输入是:4，1，3，5，6，第一个数4表示有4根柱子，圆盘上的数依次是<br>1，3，5，6.程序运行后，可以输出1-＞3-＞6，5，c＝2，表示移动是1到3，3到6，因为<br>1＋3＝4，3＋6＝9，而4和9是完全平方数，符合条件的移动只有这两次。移动结果是还有2根<br>柱子上有圆盘，即c＝2，有圆盘的一根柱子上圆盘3个，有数1-＞3-6，有圆盘另一根柱子<br>上圆盘一个，有数5，它其实没有发生移动。<br>【功能要求】<br>1.任意输入数据，第一个数据为柱子的个数，后续的数据为柱子上数的值。<br>2.将结果分行输出，一行输出一种组合。<br>3.使用函数调用完成题目功能，主函数负责数据的输入与输出，子函数负责运算。<br>【难点与提示】<br>1.提示:输入:9，1，2，3，4，5，6，7，8，9输出:1-＞3-＞6，2-＞7-＞9，4-＞5，8，c＝4输入:10，1，3，5，7，9，11，13，15，17，19输出:1-＞3-＞13，5-＞11，7-＞9，15，17-＞19，c＝52.以一个数组接收输入的数据，具体运算数据从第二个元素开始。<br>3.最终剩余的柱子数为初始数据中第一个元素值减去已生成数组个数得到。<br>4.采用递进的形式在数组中取出一个还没有被链接的元素作为新数组的开头，向后搜<br>索元素，若新数组开头元素与后续元素的和是完全平方数，则将后续的元素保存在新数组中，<br>再以保存的新元素作为当前元素在原数组中搜索下一个能相加为完全平方数的元素，直到原<br>数组所有元素搜索完毕，则新数组生成。<br>5.反复执行上述操作直到原数组中没有元素为止。<br>【更上一层楼】<br>本题可使用数组完成，可适当提高难度使用链表结构完成功能。</p><p>c语言：</p><pre><code>#include &quot;stdio.h&quot;#include &quot;math.h&quot;#define N 1000#define bool int#define true 1#define false 0void move(int a[],int n){int i,j,b,c=0;bool tag[N];for(i=0;i&lt;n;i++)tag[i]=false;for(i=0;i&lt;n;i++){if(tag[i])continue;tag[i]=true;b=i;c++;printf(&quot;%d&quot;,a[i]);for(j=i+1;j&lt;n;j++){int x=a[b]+a[j];int y=(int)(sqrt(x));if(tag[j])continue;if(y*y==x||(y+1)*(y+1)==x){printf(&quot;-&gt;%d&quot;,a[j]);tag[j]=true;b=j;}}printf(&quot;\n&quot;);}printf(&quot;c=%d\n&quot;,c);}int main(){int i,n,a[N];while(scanf(&quot;%d&quot;,&amp;n)!=EOF){for(i=0;i&lt;n;i++)scanf(&quot;%d&quot;,&amp;a[i]);move(a,n);}return 0;}</code></pre>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>【Linux安全设置】修改ROOT密码&amp;修改SSH默认登录端口教程</title>
+      <link href="/2020/01/09/%E3%80%90Linux%E5%AE%89%E5%85%A8%E8%AE%BE%E7%BD%AE%E3%80%91%E4%BF%AE%E6%94%B9ROOT%E5%AF%86%E7%A0%81&amp;%E4%BF%AE%E6%94%B9SSH%E9%BB%98%E8%AE%A4%E7%99%BB%E5%BD%95%E7%AB%AF%E5%8F%A3%E6%95%99%E7%A8%8B/"/>
+      <url>/2020/01/09/%E3%80%90Linux%E5%AE%89%E5%85%A8%E8%AE%BE%E7%BD%AE%E3%80%91%E4%BF%AE%E6%94%B9ROOT%E5%AF%86%E7%A0%81&amp;%E4%BF%AE%E6%94%B9SSH%E9%BB%98%E8%AE%A4%E7%99%BB%E5%BD%95%E7%AB%AF%E5%8F%A3%E6%95%99%E7%A8%8B/</url>
+      
+        <content type="html"><![CDATA[<h2 id="修改root登录密码"><a class="markdownIt-Anchor" href="#修改root登录密码"></a> 修改root登录密码</h2><pre><code>passwd</code></pre><ul><li>以root用户登录Linux后，输入上述命令，会提示设置新密码，键入密码的时候是没有显示的，输入完直接按回车，连续输入两遍，新的密码就设置成功了。</li></ul><hr><h2 id="修改ssh默认端口号"><a class="markdownIt-Anchor" href="#修改ssh默认端口号"></a> 修改SSH默认端口号</h2><pre><code>vi /etc/ssh/sshd_config</code></pre><ul><li><p>使用上面命令进入编辑状态，找到 Port 22 这一行，删除前面的#，修改22为<strong>65534</strong>以下的其他端口号，保存编辑状态。也可以使用SFTP下载/etc/ssh/sshd_config文件到本地修改后重新上传。修改完成后输入下面的命令重启SSH服务。</p><p>#centos系统，重启ssh服务命令<br>/etc/init.d/sshd restart</p><p>#debian/ubuntu系统，重启ssh服务命令<br>/etc/init.d/ssh restart</p></li></ul>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Linux vi命令详解</title>
+      <link href="/2020/01/09/Linux%20vi%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/"/>
+      <url>/2020/01/09/Linux%20vi%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/</url>
+      
+        <content type="html"><![CDATA[<p>vi编辑器是所有Unix及Linux系统下标准的编辑器，它的强大不逊色于任何最新的文本编辑器，这里只是简单地介绍一下它的用法和一小部分指 令。由于 对Unix及Linux系统的任何版本，vi编辑器是完全相同的，因此您可以在其他任何介绍vi的地方进一步了解它。Vi也是Linux中最基本的文本编 辑器，学会它后，您将在Linux的世界里畅行无阻。</p><h2 id="vi的基本概念"><a class="markdownIt-Anchor" href="#vi的基本概念"></a> vi的基本概念</h2><p>基本上vi可以分为三种状态，分别是命令模式（command mode）、插入模式（Insert mode）和底行模式（last line mode），各模式的功能区分如下：<br>1) 命令行模式command mode）<br>　　控制屏幕光标的移动，字符、字或行的删除，移动复制某区段及进入Insert mode下，或者到 last line mode。<br>2) 插入模式（Insert mode）<br>　　只有在Insert mode下，才可以做文字输入，按「ESC」键可回到命令行模式。<br>3) 底行模式（last line mode）<br>　　将文件保存或退出vi，也可以设置编辑环境，如寻找字符串、列出行号……等。</p><pre><code>不过一般我们在使用时把vi简化成两个模式，就是将底行模式（last line mode）也算入命令行模式command mode）。</code></pre><h2 id="vi的基本操作"><a class="markdownIt-Anchor" href="#vi的基本操作"></a> vi的基本操作</h2><p>a) 进入vi<br>　在系统提示符号输入vi及文件名称后，就进入vi全屏幕编辑画面：<br>　　　$ vi myfile<br>不过有一点要特别注意，就是您进入vi之后，是处于「命令行模式（command mode）」，您要切换到「插入模式（Insert mode）」才能够输入文字。初次使用vi的人都会想先用上下左右键移动光标，结果电脑一直哔哔叫，把自己气个半死，所以进入vi后，先不要乱动，转换到 「插入模式（Insert mode）」再说吧！</p><p>b) 切换至插入模式（Insert mode）编辑文件<br>　　在「命令行模式（command mode）」下按一下字母「i」就可以进入「插入模式（Insert mode）」，这时候你就可以开始输入文字了。</p><p>c) Insert 的切换<br>　　您目前处于「插入模式（Insert mode）」，您就只能一直输入文字，如果您发现输错了字！想用光标键往回移动，将该字删除，就要先按一下「ESC」键转到「命令行模式（command mode）」再删除文字。</p><p>d) 退出vi及保存文件<br>　　在「命令行模式（command mode）」下，按一下「：」冒号键进入「Last line mode」，例如：<br>: w filename （输入 「w filename」将文章以指定的文件名filename保存）<br>: wq (输入「wq」，存盘并退出vi)<br>: q! (输入q!， 不存盘强制退出vi)</p><h2 id="命令行模式command-mode功能键"><a class="markdownIt-Anchor" href="#命令行模式command-mode功能键"></a> 命令行模式（command mode）功能键</h2><p>1）. 插入模式<br>按「i」切换进入插入模式「insert mode」，按&quot;i&quot;进入插入模式后是从光标当前位置开始输入文件；<br>　　按「a」进入插入模式后，是从目前光标所在位置的下一个位置开始输入文字；<br>　　按「o」进入插入模式后，是插入新的一行，从行首开始输入文字。</p><p>2）. 从插入模式切换为命令行模式<br>按「ESC」键。</p><p>3）. 移动光标<br>　　vi可以直接用键盘上的光标来上下左右移动，但正规的vi是用小写英文字母「h」、「j」、「k」、「l」，分别控制光标左、下、上、右移一格。<br>　　按「ctrl」+「b」：屏幕往&quot;后&quot;移动一页。<br>　　按「ctrl」+「f」：屏幕往&quot;前&quot;移动一页。<br>　　按「ctrl」+「u」：屏幕往&quot;后&quot;移动半页。<br>　　按「ctrl」+「d」：屏幕往&quot;前&quot;移动半页。<br>　　按数字「0」：移到文章的开头。<br>　　按「G」：移动到文章的最后。<br>　　按「$」：移动到光标所在行的&quot;行尾&quot;。<br>　　按「^」：移动到光标所在行的&quot;行首&quot;<br>　　按「w」：光标跳到下个字的开头<br>　　按「e」：光标跳到下个字的字尾<br>　　按「b」：光标回到上个字的开头<br>　　按「#l」：光标移到该行的第#个位置，如：5l,56l。</p><p>4）. 删除文字<br>　　「x」：每按一次，删除光标所在位置的&quot;后面&quot;一个字符。<br>　　「#x」：例如，「6x」表示删除光标所在位置的&quot;后面&quot;6个字符。<br>　　「X」：大写的X，每按一次，删除光标所在位置的&quot;前面&quot;一个字符。<br>　　「#X」：例如，「20X」表示删除光标所在位置的&quot;前面&quot;20个字符。<br>　　「dd」：删除光标所在行。<br>　　「#dd」：从光标所在行开始删除#行</p><p>5）. 复制<br>　　「yw」：将光标所在之处到字尾的字符复制到缓冲区中。<br>　　「#yw」：复制#个字到缓冲区<br>　　「yy」：复制光标所在行到缓冲区。<br>　　「#yy」：例如，「6yy」表示拷贝从光标所在的该行&quot;往下数&quot;6行文字。<br>　　「p」：将缓冲区内的字符贴到光标所在位置。注意：所有与&quot;y&quot;有关的复制命令都必须与&quot;p&quot;配合才能完成复制与粘贴功能。</p><p>6）. 替换<br>　　「r」：替换光标所在处的字符。<br>　　「R」：替换光标所到之处的字符，直到按下「ESC」键为止。</p><p>7）. 回复上一次操作<br>　　「u」：如果您误执行一个命令，可以马上按下「u」，回到上一个操作。按多次&quot;u&quot;可以执行多次回复。</p><p>8）. 更改<br>　　「cw」：更改光标所在处的字到字尾处<br>　　「c#w」：例如，「c3w」表示更改3个字</p><p>9）. 跳至指定的行<br>　　「ctrl」+「g」列出光标所在行的行号。<br>　　「#G」：例如，「15G」，表示移动光标至文章的第15行行首。</p><h2 id="last-line-mode下命令简介"><a class="markdownIt-Anchor" href="#last-line-mode下命令简介"></a> Last line mode下命令简介</h2><p>在使用「last line mode」之前，请记住先按「ESC」键确定您已经处于「command mode」下后，再按「：」冒号即可进入「last line mode」。</p><p>A) 列出行号</p><p>「set nu」：输入「set nu」后，会在文件中的每一行前面列出行号。</p><p>B) 跳到文件中的某一行</p><p>「#」：「#」号表示一个数字，在冒号后输入一个数字，再按回车键就会跳到该行了，如输入数字15，再回车，就会跳到文章的第15行。</p><p>C) 查找字符</p><p>「/关键字」：先按「/」键，再输入您想寻找的字符，如果第一次找的关键字不是您想要的，可以一直按「n」会往后寻找到您要的关键字为止。</p><p>「?关键字」：先按「?」键，再输入您想寻找的字符，如果第一次找的关键字不是您想要的，可以一直按「n」会往前寻找到您要的关键字为止。</p><p>D) 保存文件</p><p>「w」：在冒号输入字母「w」就可以将文件保存起来。</p><p>E) 离开vi</p><p>「q」：按「q」就是退出，如果无法离开vi，可以在「q」后跟一个「!」强制离开vi。</p><p>「qw」：一般建议离开时，搭配「w」一起使用，这样在退出的时候还可以保存文件。</p><h2 id="vi命令列表"><a class="markdownIt-Anchor" href="#vi命令列表"></a> vi命令列表</h2><p>1、下表列出命令模式下的一些键的功能：</p><pre><code>h</code></pre><p>左移光标一个字符</p><pre><code>l</code></pre><p>右移光标一个字符</p><pre><code>k</code></pre><p>光标上移一行</p><pre><code>j</code></pre><p>光标下移一行</p><pre><code>^</code></pre><p>光标移动至行首</p><pre><code>0</code></pre><p>数字&quot;0&quot;，光标移至文章的开头</p><pre><code>G</code></pre><p>光标移至文章的最后</p><pre><code>$</code></pre><p>光标移动至行尾</p><pre><code>Ctrl+f</code></pre><p>向前翻屏</p><pre><code>Ctrl+b</code></pre><p>向后翻屏</p><pre><code>Ctrl+d</code></pre><p>向前翻半屏</p><pre><code>Ctrl+u</code></pre><p>向后翻半屏</p><pre><code>i</code></pre><p>在光标位置前插入字符</p><pre><code>a</code></pre><p>在光标所在位置的后一个字符开始增加</p><pre><code>o</code></pre><p>插入新的一行，从行首开始输入</p><pre><code>ESC</code></pre><p>从输入状态退至命令状态</p><pre><code>x</code></pre><p>删除光标后面的字符</p><pre><code>#x</code></pre><p>删除光标后的＃个字符</p><pre><code>X</code></pre><p>(大写X)，删除光标前面的字符</p><pre><code>#X</code></pre><p>删除光标前面的#个字符</p><pre><code>dd</code></pre><p>删除光标所在的行</p><pre><code>#dd</code></pre><p>删除从光标所在行数的#行</p><pre><code>yw</code></pre><p>复制光标所在位置的一个字</p><pre><code>#yw</code></pre><p>复制光标所在位置的#个字</p><pre><code>yy</code></pre><p>复制光标所在位置的一行</p><pre><code>#yy</code></pre><p>复制从光标所在行数的#行</p><pre><code>p</code></pre><p>粘贴</p><pre><code>u</code></pre><p>取消操作</p><pre><code>cw</code></pre><p>更改光标所在位置的一个字</p><pre><code>#cw</code></pre><p>更改光标所在位置的#个字</p><p>2、下表列出行命令模式下的一些指令<br>w filename<br>储存正在编辑的文件为filename</p><p>wq filename<br>储存正在编辑的文件为filename，并退出vi</p><p>q!<br>放弃所有修改，退出vi</p><p>set nu<br>显示行号</p><p>/或?<br>查找，在/后输入要查找的内容</p><p>n<br>与/或?一起使用，如果查找的内容不是想要找的关键字，按n或向后（与/联用）或向前（与?联用）继续查找，直到找到为止。</p><hr><p>对于第一次用vi，有几点注意要提醒一下：<br>1、 用vi打开文件后，是处于「命令行模式（command mode）」，您要切换到「插入模式（Insert mode）」才能够输入文字。切换方法：在「命令行模式（command mode）」下按一下字母「i」就可以进入「插入模式（Insert mode）」，这时候你就可以开始输入文字了。<br>2、编辑好后，需从插入模式切换为命令行模式才能对文件进行保存，切换方法：按「ESC」键。<br>3、保存并退出文件：在命令模式下输入:wq即可！（别忘了wq前面的:）</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>宝塔面板安装ZFAKA</title>
+      <link href="/2020/01/09/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E5%AE%89%E8%A3%85ZFAKA/"/>
+      <url>/2020/01/09/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E5%AE%89%E8%A3%85ZFAKA/</url>
+      
+        <content type="html"><![CDATA[<p>开源地址：<a href="https://github.com/zlkbdotnet/zfaka" target="_blank" rel="noopener">https://github.com/zlkbdotnet/zfaka</a></p><p>版本下载：<a href="https://github.com/zlkbdotnet/zfaka/releases" target="_blank" rel="noopener">https://github.com/zlkbdotnet/zfaka/releases</a></p><p>最新测试版：git clone <a href="https://github.com/zlkbdotnet/zfaka.git" target="_blank" rel="noopener">https://github.com/zlkbdotnet/zfaka.git</a></p><p>演示地址：<a href="https://faka.zlkb.net/product/" target="_blank" rel="noopener">https://faka.zlkb.net/product/</a></p><p><a href="https://www.daniao.org/5178.html" target="_blank" rel="noopener">引用</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>while(scanf(%d,&amp;n),n)，while(scanf(%d,&amp;n)！=EOF)，while(scanf(%d,&amp;n)==1)和while(~scanf(%d,&amp;n)）</title>
+      <link href="/2020/01/09/while(scanf(%25d,&amp;n),n)%EF%BC%8Cwhile(scanf(%25d,&amp;n)%EF%BC%81=EOF)%EF%BC%8Cwhile(scanf(%25d,&amp;n)==1)%E5%92%8Cwhile(~scanf(%25d,&amp;n)%EF%BC%89/"/>
+      <url>/2020/01/09/while(scanf(%25d,&amp;n),n)%EF%BC%8Cwhile(scanf(%25d,&amp;n)%EF%BC%81=EOF)%EF%BC%8Cwhile(scanf(%25d,&amp;n)==1)%E5%92%8Cwhile(~scanf(%25d,&amp;n)%EF%BC%89/</url>
+      
+        <content type="html"><![CDATA[<p>##算法题目中经常会用到几个while语句，能够同时输入和判断，比较好用</p><p>1、while(scanf(&quot;%d&quot;,&amp;n),n)<br>功能：当n为0时中止循环</p><p>这里要先说一下逗号表达式：逗号表达式的值是逗号后面的那个数。例如x=(5,6）,则x=6。</p><p>while(scanf(&quot;%d&quot;,&amp;n),n)括号里的语句其实就是个逗号表达式，它的返回值是n的值，所以这个语句就相当于while（n），n=0时跳出循环，写成这样是为了输入。</p><p>如果是while(scanf(&quot;%d%d&quot;,&amp;n,&amp;m,),n，m)，那么就相当于while（m）。</p><p>2、while(scanf(&quot;%d&quot;,&amp;n)！=EOF)和while(~scanf(&quot;%d&quot;,&amp;n)）<br>功能：当读到文件结尾时中止循环</p><p>scanf语句的返回值为成功赋值的个数，例如scanf(&quot;%d %d&quot;,&amp;a,&amp;b),如果a、b均赋值成功返回值为2，只是a赋值成功返回1，a、b都不成功返回0，出错的时候返回EOF。</p><p>~是按位取反，scanf语句如果没有输入值就是返回-1，按位取反结果为0。</p><p>注意：这两种方法在输入字母的时候会变成死循环，而scanf(&quot;%d %d&quot;,&amp;a,&amp;b)==2不会。windows下可通过按“Ctrl +Z”、linux下可通过“Ctrl + D”来来达到“输入”文件结束符的效果，结束循环。</p><p>3、while(scanf(&quot;%d&quot;,&amp;n)==1)<br>功能：赋值失败，跳出循环</p><p>这个应该很好理解了吧，如果是scanf(&quot;%d%d&quot;,&amp;n,&amp;m就是while(scanf(&quot;%d %d&quot;,&amp;a,&amp;b)==2)。<br>————————————————</p><p>原文链接：<a href="https://blog.csdn.net/qq_38250032/article/details/81636787" target="_blank" rel="noopener">https://blog.csdn.net/qq_38250032/article/details/81636787</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>如何在linux下创建一个可运行脚本？</title>
+      <link href="/2020/01/09/%E5%A6%82%E4%BD%95%E5%9C%A8linux%E4%B8%8B%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%8F%AF%E8%BF%90%E8%A1%8C%E8%84%9A%E6%9C%AC%EF%BC%9F/"/>
+      <url>/2020/01/09/%E5%A6%82%E4%BD%95%E5%9C%A8linux%E4%B8%8B%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%8F%AF%E8%BF%90%E8%A1%8C%E8%84%9A%E6%9C%AC%EF%BC%9F/</url>
+      
+        <content type="html"><![CDATA[<ol><li><p>新建一个.sh文件，<code>touch test.sh</code></p></li><li><p>编辑test.sh文件，<code>vi test.sh</code></p><p>然后键入i，输入内容，</p><p><code>#!/bin/sh</code>必须放在第一行</p><p>然后键入esc</p><p>键入:wq保存退出</p></li><li><p>给test.sh赋予可执行权限，<code>chmod +x test.sh</code></p></li><li><p>执行脚本<code>./test.sh</code>,即可执行脚本</p></li><li><p>也可以通过<code>sh ./test.sh</code> 执行脚本</p></li></ol>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>宝塔面板安装命令</title>
+      <link href="/2020/01/09/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E5%AE%89%E8%A3%85%E5%91%BD%E4%BB%A4/"/>
+      <url>/2020/01/09/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E5%AE%89%E8%A3%85%E5%91%BD%E4%BB%A4/</url>
+      
+        <content type="html"><![CDATA[<ul><li>使用SSH客户端(比如Xshell)登录VPS，使用命令：</li></ul><p>#CentOS系统</p><pre><code>wget -O install.sh http://download.bt.cn/install/install_6.0.sh &amp;&amp; sh install.sh</code></pre><p>#Ubuntu系统</p><pre><code>wget -O install.sh http://download.bt.cn/install/install-ubuntu_6.0.sh &amp;&amp; sudo bash install.sh</code></pre><p>#Debian系统</p><pre><code>wget -O install.sh http://download.bt.cn/install/install-ubuntu_6.0.sh &amp;&amp; bash install.sh</code></pre><a id="more"></a><blockquote><p>提示：如果我们后续未修改密码却忘记了密码的话，可以在SSH客户端使用命令<code>bt default</code>来查看安装后的默认后台信息。</p></blockquote>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>《曾鸣智能商业20讲》</title>
+      <link href="/2020/01/09/%E3%80%8A%E6%9B%BE%E9%B8%A3%E6%99%BA%E8%83%BD%E5%95%86%E4%B8%9A20%E8%AE%B2%E3%80%8B/"/>
+      <url>/2020/01/09/%E3%80%8A%E6%9B%BE%E9%B8%A3%E6%99%BA%E8%83%BD%E5%95%86%E4%B8%9A20%E8%AE%B2%E3%80%8B/</url>
+      
+        <content type="html"><![CDATA[<ul><li><p>所谓连结到互联网上，最核心的是要实现一个在线的状态。</p></li><li><p>怎么赶上这个智能化的浪潮？其实核心在于你能不能够创新地实现产品化，把你的核心业务流程在线化，这样的话数据才能被记录下来。然后你可以在这些大互联网企业提供的算法工具包里，去挑一个合适你的算法。 三位一体，产品提供反馈闭环，数据作为原料，交给算法去处理，你的业务就变成了一个智能业务。 你就能比你的竞争对手每天都越跑越快。这是未来竞争能够脱颖而出最重要的一个秘诀。</p></li></ul>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>为 Typecho 评论框加入七彩打字动画</title>
+      <link href="/2020/01/09/%E4%B8%BA%20Typecho%20%E8%AF%84%E8%AE%BA%E6%A1%86%E5%8A%A0%E5%85%A5%E4%B8%83%E5%BD%A9%E6%89%93%E5%AD%97%E5%8A%A8%E7%94%BB/"/>
+      <url>/2020/01/09/%E4%B8%BA%20Typecho%20%E8%AF%84%E8%AE%BA%E6%A1%86%E5%8A%A0%E5%85%A5%E4%B8%83%E5%BD%A9%E6%89%93%E5%AD%97%E5%8A%A8%E7%94%BB/</url>
+      
+        <content type="html"><![CDATA[<p>对于 Mirages，依次进入 <code>控制台 -&gt; 外观 -&gt; 设置外观 -&gt; 自定义扩展</code>，将以下代码加入到 <code>自定义 HTML 元素拓展 - 在 body 标签结束前</code> 即可。</p><p>其他主题，加入到主题对应的 <code>footer.php</code> 中 <code>&lt;/body&gt;</code> 标签结束之前。</p><pre><code>&lt;script&gt;(function webpackUniversalModuleDefinition(a,b){if(typeof exports===&quot;object&quot;&amp;&amp;typeof module===&quot;object&quot;){module.exports=b()}else{if(typeof define===&quot;function&quot;&amp;&amp;define.amd){define([],b)}else{if(typeof exports===&quot;object&quot;){exports[&quot;POWERMODE&quot;]=b()}else{a[&quot;POWERMODE&quot;]=b()}}}})(this,function(){return(function(a){var b={};function c(e){if(b[e]){return b[e].exports}var d=b[e]={exports:{},id:e,loaded:false};a[e].call(d.exports,d,d.exports,c);d.loaded=true;return d.exports}c.m=a;c.c=b;c.p=&quot;&quot;;return c(0)})([function(c,g,b){var d=document.createElement(&quot;canvas&quot;);d.width=window.innerWidth;d.height=window.innerHeight;d.style.cssText=&quot;position:fixed;top:0;left:0;pointer-events:none;z-index:999999&quot;;window.addEventListener(&quot;resize&quot;,function(){d.width=window.innerWidth;d.height=window.innerHeight});document.body.appendChild(d);var a=d.getContext(&quot;2d&quot;);var n=[];var j=0;var k=120;var f=k;var p=false;o.shake=true;function l(r,q){return Math.random()*(q-r)+r}function m(r){if(o.colorful){var q=l(0,360);return&quot;hsla(&quot;+l(q-10,q+10)+&quot;, 100%, &quot;+l(50,80)+&quot;%, &quot;+1+&quot;)&quot;}else{return window.getComputedStyle(r).color}}function e(){var t=document.activeElement;var v;if(t.tagName===&quot;TEXTAREA&quot;||(t.tagName===&quot;INPUT&quot;&amp;&amp;t.getAttribute(&quot;type&quot;)===&quot;text&quot;)){var u=b(1)(t,t.selectionStart);v=t.getBoundingClientRect();return{x:u.left+v.left,y:u.top+v.top,color:m(t)}}var s=window.getSelection();if(s.rangeCount){var q=s.getRangeAt(0);var r=q.startContainer;if(r.nodeType===document.TEXT_NODE){r=r.parentNode}v=q.getBoundingClientRect();return{x:v.left,y:v.top,color:m(r)}}return{x:0,y:0,color:&quot;transparent&quot;}}function h(q,s,r){return{x:q,y:s,alpha:1,color:r,velocity:{x:-1+Math.random()*2,y:-3.5+Math.random()*2}}}function o(){var t=e();var s=5+Math.round(Math.random()*10);while(s--){n[j]=h(t.x,t.y,t.color);j=(j+1)%500}f=k;if(!p){requestAnimationFrame(i)}if(o.shake){var r=1+2*Math.random();var q=r*(Math.random()&gt;0.5?-1:1);var u=r*(Math.random()&gt;0.5?-1:1);document.body.style.marginLeft=q+&quot;px&quot;;document.body.style.marginTop=u+&quot;px&quot;;setTimeout(function(){document.body.style.marginLeft=&quot;&quot;;document.body.style.marginTop=&quot;&quot;},75)}}o.colorful=false;function i(){if(f&gt;0){requestAnimationFrame(i);f--;p=true}else{p=false}a.clearRect(0,0,d.width,d.height);for(var q=0;q&lt;n.length;++q){var r=n[q];if(r.alpha&lt;=0.1){continue}r.velocity.y+=0.075;r.x+=r.velocity.x;r.y+=r.velocity.y;r.alpha*=0.96;a.globalAlpha=r.alpha;a.fillStyle=r.color;a.fillRect(Math.round(r.x-1.5),Math.round(r.y-1.5),3,3)}}requestAnimationFrame(i);c.exports=o},function(b,a){(function(){var d=[&quot;direction&quot;,&quot;boxSizing&quot;,&quot;width&quot;,&quot;height&quot;,&quot;overflowX&quot;,&quot;overflowY&quot;,&quot;borderTopWidth&quot;,&quot;borderRightWidth&quot;,&quot;borderBottomWidth&quot;,&quot;borderLeftWidth&quot;,&quot;borderStyle&quot;,&quot;paddingTop&quot;,&quot;paddingRight&quot;,&quot;paddingBottom&quot;,&quot;paddingLeft&quot;,&quot;fontStyle&quot;,&quot;fontVariant&quot;,&quot;fontWeight&quot;,&quot;fontStretch&quot;,&quot;fontSize&quot;,&quot;fontSizeAdjust&quot;,&quot;lineHeight&quot;,&quot;fontFamily&quot;,&quot;textAlign&quot;,&quot;textTransform&quot;,&quot;textIndent&quot;,&quot;textDecoration&quot;,&quot;letterSpacing&quot;,&quot;wordSpacing&quot;,&quot;tabSize&quot;,&quot;MozTabSize&quot;];var e=window.mozInnerScreenX!=null;function c(k,l,o){var h=o&amp;&amp;o.debug||false;if(h){var i=document.querySelector(&quot;#input-textarea-caret-position-mirror-div&quot;);if(i){i.parentNode.removeChild(i)}}var f=document.createElement(&quot;div&quot;);f.id=&quot;input-textarea-caret-position-mirror-div&quot;;document.body.appendChild(f);var g=f.style;var j=window.getComputedStyle?getComputedStyle(k):k.currentStyle;g.whiteSpace=&quot;pre-wrap&quot;;if(k.nodeName!==&quot;INPUT&quot;){g.wordWrap=&quot;break-word&quot;}g.position=&quot;absolute&quot;;if(!h){g.visibility=&quot;hidden&quot;}d.forEach(function(p){g[p]=j[p]});if(e){if(k.scrollHeight&gt;parseInt(j.height)){g.overflowY=&quot;scroll&quot;}}else{g.overflow=&quot;hidden&quot;}f.textContent=k.value.substring(0,l);if(k.nodeName===&quot;INPUT&quot;){f.textContent=f.textContent.replace(/\s/g,&quot;\u00a0&quot;)}var n=document.createElement(&quot;span&quot;);n.textContent=k.value.substring(l)||&quot;.&quot;;f.appendChild(n);var m={top:n.offsetTop+parseInt(j[&quot;borderTopWidth&quot;]),left:n.offsetLeft+parseInt(j[&quot;borderLeftWidth&quot;])};if(h){n.style.backgroundColor=&quot;#aaa&quot;}else{document.body.removeChild(f)}return m}if(typeof b!=&quot;undefined&quot;&amp;&amp;typeof b.exports!=&quot;undefined&quot;){b.exports=c}else{window.getCaretCoordinates=c}}())}])});POWERMODE.colorful=true;POWERMODE.shake=false;document.body.addEventListener(&quot;input&quot;,POWERMODE);&lt;/script&gt;</code></pre>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>CentOS 7 查看端口开放情况及如何开放</title>
+      <link href="/2020/01/09/centos%E6%9F%A5%E7%9C%8B%E7%AB%AF%E5%8F%A3%E5%BC%80%E6%94%BE%E6%83%85%E5%86%B5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%BC%80%E6%94%BE/"/>
+      <url>/2020/01/09/centos%E6%9F%A5%E7%9C%8B%E7%AB%AF%E5%8F%A3%E5%BC%80%E6%94%BE%E6%83%85%E5%86%B5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%BC%80%E6%94%BE/</url>
+      
+        <content type="html"><![CDATA[<ul><li>查看所有开放的端口：<code>firewall-cmd --list-ports</code></li></ul><a id="more"></a><ul><li>查看某一端口是否开放，如 8080 端口：<code>firewall-cmd --query-port=8080/tcp</code><br>开放返回 yes，否则为 no。</li></ul><!--more--><hr><ul><li>永久开放 8080 端口：<code>firewall-cmd --zone=public --add-port=8080/tcp --permanent</code><br>开放成功返回 success。</li></ul><blockquote><p>其中，</p></blockquote><p>–zone   #表示作用域</p><p>–add-port=8080/tcp    #表示添加端口，格式为：端口/通信协议</p><p>–permanent    #表示永久生效，如果没有此参数则系统重启后失效</p><p><em><strong>注意，开放端口后应重启防火墙，使端口开放生效。</strong></em></p><hr><!--more--><ul><li>重启防火墙：<code>firewall-cmd --reload</code></li></ul><!--more--><ul><li>移除开放的 8080 端口：<code>firewall-cmd --permanent --zone=public --remove-port=8080/tcp</code><br>移除开放端口后也应重启防火墙。</li></ul><!--more--><ul><li>查看防火墙状态：<code>systemctl status firewalld.service</code></li><li>启动 | 关闭 | 重启  防火墙 ：<code>systemctl [start|stop|restart] firewalld.service</code></li></ul>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>C 语言的布尔类型(true 与 false)</title>
+      <link href="/2020/01/09/C%20%E8%AF%AD%E8%A8%80%E7%9A%84%E5%B8%83%E5%B0%94%E7%B1%BB%E5%9E%8B(true%20%E4%B8%8E%20false)/"/>
+      <url>/2020/01/09/C%20%E8%AF%AD%E8%A8%80%E7%9A%84%E5%B8%83%E5%B0%94%E7%B1%BB%E5%9E%8B(true%20%E4%B8%8E%20false)/</url>
+      
+        <content type="html"><![CDATA[<p>C 语言标准(C89) 没有定义布尔类型，如果你使用 true 和 false，会出现错误<br>解决方法：<br>我们可以借助 C 语言的宏定义来哦设置：</p><pre><code>//宏定义布尔类型#define bool int#define true 1#define false 0 //定义一个布尔变量BOOL flag = FALSE;</code></pre><p>也可以通过枚举类来定义：</p><pre><code>typedef enum{    true=1, false=0}bool;</code></pre>]]></content>
+      
+      
+      
+    </entry>
+    
+    
   
   
 </search>
