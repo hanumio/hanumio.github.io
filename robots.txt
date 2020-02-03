@@ -5,11 +5,9 @@ Allow: /archives/
 Allow: /categories/
 Allow: /tags/
 Allow: /music/
-Allow: /Gallery/
 Allow: /movies/
-Allow: /message/
-Allow: /link/
 Allow: /about/
+
 
 Disallow: /vendors/
 Disallow: /js/
