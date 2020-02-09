@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://adjhy.com/image/pwa/manifest.json</loc>
+    
+    <lastmod>2020-02-09T12:06:11.510Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://adjhy.com/message/index.html</loc>
     
     <lastmod>2020-02-09T11:37:04.949Z</lastmod>
@@ -96,13 +103,6 @@
     <loc>https://adjhy.com/archives/61c55686.html</loc>
     
     <lastmod>2020-02-08T10:57:28.780Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://adjhy.com/image/pwa/manifest.json</loc>
-    
-    <lastmod>2020-02-04T12:32:41.452Z</lastmod>
     
   </url>
   
